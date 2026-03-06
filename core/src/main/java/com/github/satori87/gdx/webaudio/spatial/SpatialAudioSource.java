@@ -10,6 +10,11 @@ import com.github.satori87.gdx.webaudio.types.DistanceModel;
  * <p>Provides a simplified API for positioning, volume control, and distance model
  * configuration without directly managing the underlying panner node. Audio is routed
  * through an input node, the panner, and an output node.</p>
+ *
+ * <p>{@link com.github.satori87.gdx.webaudio.WebSound WebSound} and
+ * {@link com.github.satori87.gdx.webaudio.WebMusic WebMusic} can be spatialized
+ * by routing their output to this source's input:
+ * {@code sound.setOutput(spatialSource.getInput())}</p>
  */
 public interface SpatialAudioSource {
 

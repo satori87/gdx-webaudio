@@ -6,6 +6,14 @@ package com.github.satori87.gdx.webaudio;
  * <p>Audio sources connect to the group's {@linkplain #getInput() input node}, and the
  * group's {@linkplain #getOutput() output node} connects to the destination or another
  * group. Volume and pan affect all sources routed through the group.</p>
+ *
+ * <p>{@link WebSound} and {@link WebMusic} instances can route through a group via
+ * their {@code setOutput()} method:</p>
+ * <pre>{@code
+ * SoundGroup sfx = ctx.createSoundGroup();
+ * sfx.getOutput().connect(ctx.getDestination());
+ * sound.setOutput(sfx.getInput());
+ * }</pre>
  */
 public interface SoundGroup {
 

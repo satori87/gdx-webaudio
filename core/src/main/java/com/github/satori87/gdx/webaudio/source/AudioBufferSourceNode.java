@@ -10,6 +10,11 @@ import com.github.satori87.gdx.webaudio.AudioParam;
  * <p>This is a one-shot source node: once playback has started, the node cannot be restarted.
  * Create a new instance for each playback. Supports looping, playback rate control, and
  * detuning via automatable {@link AudioParam} properties.</p>
+ *
+ * <p>For simpler sound effect or music playback without manual node management, use
+ * {@link com.github.satori87.gdx.webaudio.WebSound WebSound} or
+ * {@link com.github.satori87.gdx.webaudio.WebMusic WebMusic} which handle one-shot
+ * node creation and lifecycle automatically.</p>
  */
 public interface AudioBufferSourceNode extends AudioScheduledSourceNode {
 

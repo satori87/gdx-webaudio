@@ -7,6 +7,10 @@ package com.github.satori87.gdx.webaudio;
  * {@link #setPlatform(WebAudioPlatform)}. When using the TeaVM backend, call
  * {@code TeaVMWebAudio.initialize()} which handles this automatically.
  *
+ * <p>After creating a context, use {@link WebAudioContext#loadSound} and
+ * {@link WebAudioContext#loadMusic} for typical audio playback, or create
+ * nodes directly for advanced audio synthesis and processing.</p>
+ *
  * @see WebAudioContext
  * @see OfflineAudioContext
  */

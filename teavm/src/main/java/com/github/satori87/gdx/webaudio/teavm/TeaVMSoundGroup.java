@@ -10,7 +10,10 @@ import com.github.satori87.gdx.webaudio.effect.StereoPannerNode;
  * TeaVM/browser implementation of {@link SoundGroup}.
  *
  * <p>Routes audio through a {@link StereoPannerNode} and {@link GainNode} to provide
- * shared volume, pan, and fade controls for grouped audio sources.</p>
+ * shared volume, pan, and fade controls for grouped audio sources. Use with
+ * {@link com.github.satori87.gdx.webaudio.WebSound WebSound} and
+ * {@link com.github.satori87.gdx.webaudio.WebMusic WebMusic} via their
+ * {@code setOutput(group.getInput())} method.</p>
  */
 public class TeaVMSoundGroup implements SoundGroup {
     private final WebAudioContext context;

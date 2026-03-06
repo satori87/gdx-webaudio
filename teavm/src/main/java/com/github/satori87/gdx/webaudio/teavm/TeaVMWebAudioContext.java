@@ -1,5 +1,6 @@
 package com.github.satori87.gdx.webaudio.teavm;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.github.satori87.gdx.webaudio.*;
 import com.github.satori87.gdx.webaudio.analysis.AnalyserNode;
 import com.github.satori87.gdx.webaudio.channel.ChannelMergerNode;
@@ -29,6 +30,10 @@ import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
  * <p>Wraps a {@link JSAudioContext} to delegate all audio context operations to the
  * browser's native {@code AudioContext}. Also serves as a base class for
  * {@link TeaVMOfflineAudioContext}.</p>
+ *
+ * <p>Includes high-level {@link #loadSound} and {@link #loadMusic} methods that
+ * handle file reading, decoding, and wrapping in {@link TeaVMWebSound} or
+ * {@link TeaVMWebMusic} instances.</p>
  */
 public class TeaVMWebAudioContext implements WebAudioContext {
     protected final JSAudioContext jsCtx;
@@ -121,4 +126,13 @@ public class TeaVMWebAudioContext implements WebAudioContext {
     @Override public SoundGroup createSoundGroup() { return new TeaVMSoundGroup(this); }
     @Override public SpatialAudioScene2D createSpatialScene2D() { return new TeaVMSpatialAudioScene2D(this); }
     @Override public SpatialAudioScene3D createSpatialScene3D() { return new TeaVMSpatialAudioScene3D(this); }
+
+    @Override public void loadSound(FileHandle file, WebSound.LoadCallback onLoaded, Runnable onError) {
+        byte[] data = file.readBytes();
+        decodeAudioData(data, buffer -> onLoaded.onLoaded(new TeaVMWebSound(this, buffer)), onError);
+    }
+    @Override public void loadMusic(FileHandle file, WebMusic.LoadCallback onLoaded, Runnable onError) {
+        byte[] data = file.readBytes();
+        decodeAudioData(data, buffer -> onLoaded.onLoaded(new TeaVMWebMusic(this, buffer)), onError);
+    }
 }

@@ -51,6 +51,10 @@ The `examples/` directory is a **standalone Gradle project** (not a subproject o
   - Gretty plugin provides `run` task (local Jetty server)
 - **`assets/`** — Shared assets (uiskin, white-noise-processor.js)
 
+## Code Style
+
+- Always use `import` statements instead of fully qualified class references in code. Never inline FQ paths like `com.github.satori87.gdx.webaudio.effect.GainNode` in method signatures or bodies — add an import and use the simple name.
+
 ## Key Patterns
 
 - All Web Audio API string enums map to Java enums with `toJsValue()`/`fromJsValue()` methods

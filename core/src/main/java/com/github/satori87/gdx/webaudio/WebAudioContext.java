@@ -1,5 +1,6 @@
 package com.github.satori87.gdx.webaudio;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.github.satori87.gdx.webaudio.analysis.AnalyserNode;
 import com.github.satori87.gdx.webaudio.channel.ChannelMergerNode;
 import com.github.satori87.gdx.webaudio.channel.ChannelSplitterNode;
@@ -16,9 +17,15 @@ import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
  * Main audio context interface representing a real-time audio processing graph.
  * Maps to the Web Audio API {@code AudioContext} interface.
  * <p>
- * Provides factory methods for creating all types of audio nodes, as well as
- * methods for managing the context lifecycle, decoding audio data, and querying
- * context state and timing information.
+ * For most audio playback, start with the high-level methods:
+ * <ul>
+ *   <li>{@link #loadSound} — fire-and-forget sound effects (mirrors libGDX {@code Sound})</li>
+ *   <li>{@link #loadMusic} — long-form music with pause/seek (mirrors libGDX {@code Music})</li>
+ * </ul>
+ *
+ * <p>For advanced audio synthesis and processing, this interface also provides factory
+ * methods for creating all types of audio nodes, managing the context lifecycle,
+ * decoding audio data, and querying context state and timing information.</p>
  *
  * @see AudioContext (Web Audio API)
  */
@@ -409,4 +416,26 @@ public interface WebAudioContext {
      * @return a new {@link SpatialAudioScene3D}
      */
     SpatialAudioScene3D createSpatialScene3D();
+
+    // -- High-level playback --
+
+    /**
+     * Loads a sound file for fire-and-forget playback, similar to libGDX's {@code Sound}.
+     * Reads the file, decodes it asynchronously, and delivers a ready-to-use {@link WebSound}.
+     *
+     * @param file     the audio file to load
+     * @param onLoaded callback invoked with the loaded WebSound
+     * @param onError  callback invoked if loading fails, or null
+     */
+    void loadSound(FileHandle file, WebSound.LoadCallback onLoaded, Runnable onError);
+
+    /**
+     * Loads a music file for long-form playback, similar to libGDX's {@code Music}.
+     * Reads the file, decodes it asynchronously, and delivers a ready-to-use {@link WebMusic}.
+     *
+     * @param file     the audio file to load
+     * @param onLoaded callback invoked with the loaded WebMusic
+     * @param onError  callback invoked if loading fails, or null
+     */
+    void loadMusic(FileHandle file, WebMusic.LoadCallback onLoaded, Runnable onError);
 }

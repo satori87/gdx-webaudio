@@ -8,6 +8,7 @@ A comprehensive Java abstraction over the [Web Audio API](https://developer.mozi
 
 ## Features
 
+- **Simple high-level API** — `WebSound` and `WebMusic` for fire-and-forget playback mirroring libGDX's Sound/Music interfaces
 - **Complete Web Audio API coverage** — Oscillators, buffer sources, gain, filters, delay, reverb, compression, wave shaping, stereo panning, and more
 - **Composite effects** — High-level Chorus, Flanger, Phaser, Reverb, and Limiter nodes with simple parameter controls
 - **Noise generation** — White, pink, and brownian noise via `NoiseNode`
@@ -71,20 +72,46 @@ WebAudioContext ctx = WebAudio.createContext();
 ctx.resume(null);
 ```
 
-### Playing a Sound File
+### Playing a Sound Effect
 
 ```java
-// Load and decode audio data
+// Load and play a sound — that's it!
+ctx.loadSound(Gdx.files.internal("coin.wav"), sound -> {
+    sound.play();           // Fire-and-forget
+    sound.play(0.5f);       // Play at 50% volume
+    sound.play(1f, 1.5f, 0f); // Volume, pitch, pan
+    long id = sound.loop();    // Loop and get instance ID
+    sound.stop(id);            // Stop specific instance
+}, () -> Gdx.app.error("Audio", "Failed to load sound"));
+```
+
+### Playing Music
+
+```java
+ctx.loadMusic(Gdx.files.internal("background.wav"), music -> {
+    music.setLooping(true);
+    music.setVolume(0.8f);
+    music.play();
+
+    // Later...
+    music.pause();
+    music.setPosition(30f);  // Seek to 30 seconds
+    music.play();            // Resume from new position
+}, () -> Gdx.app.error("Audio", "Failed to load music"));
+```
+
+### Advanced: Low-Level Playback
+
+For full control over the audio graph, use the low-level API directly:
+
+```java
 byte[] wavData = Gdx.files.internal("coin.wav").readBytes();
 ctx.decodeAudioData(wavData, buffer -> {
-    // Create a source, connect to output, and play
     AudioBufferSourceNode source = ctx.createBufferSource();
     source.setBuffer(buffer);
     source.connect(ctx.getDestination());
     source.start();
-}, () -> {
-    Gdx.app.error("Audio", "Failed to decode audio");
-});
+}, () -> Gdx.app.error("Audio", "Failed to decode audio"));
 ```
 
 ### Playing an Oscillator Tone
@@ -111,6 +138,91 @@ osc.stop(ctx.getCurrentTime() + 2.0);
 
 ---
 
+## WebSound (Sound Effects)
+
+`WebSound` provides fire-and-forget playback for short sound effects, mirroring libGDX's `Sound` interface. Multiple instances can play concurrently, each controlled by a unique ID.
+
+```java
+ctx.loadSound(Gdx.files.internal("laser.wav"), sound -> {
+    // Basic playback
+    long id = sound.play();              // Play at default volume
+    long id2 = sound.play(0.5f);         // Play at 50% volume
+    long id3 = sound.play(1f, 2f, 0.5f); // Volume, pitch, pan (right)
+
+    // Looping
+    long loopId = sound.loop();
+    long loopId2 = sound.loop(0.7f, 1f, -1f); // Volume, pitch, pan (left)
+
+    // Per-instance control
+    sound.setVolume(id, 0.3f);
+    sound.setPitch(id, 1.5f);
+    sound.setPan(id, -0.5f, 0.8f);      // Pan + volume
+    sound.setLooping(id, true);
+
+    // Pause/resume individual or all instances
+    sound.pause(id);
+    sound.resume(id);
+    sound.pause();   // Pause all
+    sound.resume();  // Resume all
+
+    // Stop individual or all
+    sound.stop(id);
+    sound.stop();    // Stop all
+
+    // Route through effects or spatial audio
+    SoundGroup sfxGroup = ctx.createSoundGroup();
+    sfxGroup.getOutput().connect(ctx.getDestination());
+    sound.setOutput(sfxGroup.getInput());
+
+    // Clean up when no longer needed
+    sound.dispose();
+}, null);
+```
+
+## WebMusic (Long-Form Playback)
+
+`WebMusic` provides single-instance playback for music tracks with pause, resume, seek, and completion callbacks — mirroring libGDX's `Music` interface.
+
+```java
+ctx.loadMusic(Gdx.files.internal("soundtrack.wav"), music -> {
+    // Playback control
+    music.play();
+    music.pause();
+    music.play();    // Resumes from paused position
+    music.stop();    // Resets to beginning
+
+    // State
+    boolean playing = music.isPlaying();
+    float pos = music.getPosition();       // Current position in seconds
+    float dur = music.getDuration();       // Total duration in seconds
+
+    // Looping
+    music.setLooping(true);
+
+    // Volume and pan
+    music.setVolume(0.7f);
+    music.setPan(-0.5f, 0.8f);            // Pan + volume
+
+    // Seek
+    music.setPosition(60f);                // Jump to 60 seconds
+
+    // Completion callback (non-looping only)
+    music.setOnCompletionListener(m -> {
+        Gdx.app.log("Audio", "Music finished!");
+    });
+
+    // Route through effects
+    music.setOutput(reverbNode);
+
+    // Clean up
+    music.dispose();
+}, null);
+```
+
+Both `WebSound` and `WebMusic` provide `getBuffer()` as an escape hatch to access the underlying `AudioBuffer` for advanced use cases.
+
+---
+
 ## Simple Examples
 
 ### Volume Control
@@ -130,6 +242,17 @@ volume.getGain().linearRampToValueAtTime(0.0f, now + 1.0);
 ```
 
 ### Looping Music
+
+The simplest way to loop music is with `WebMusic`:
+
+```java
+ctx.loadMusic(Gdx.files.internal("music.wav"), music -> {
+    music.setLooping(true);
+    music.play();
+}, null);
+```
+
+For advanced control (custom loop points, routing), use the low-level API:
 
 ```java
 AudioBufferSourceNode music = ctx.createBufferSource();
@@ -621,7 +744,7 @@ sfxBus.getGain().setValueAtTime(0, ctx.getCurrentTime());
 
 ### SoundGroup (Mixing Bus)
 
-`SoundGroup` provides a higher-level mixing bus with built-in volume, stereo pan, and fade controls:
+`SoundGroup` provides a higher-level mixing bus with built-in volume, stereo pan, and fade controls. Works with both `WebSound`/`WebMusic` (via `setOutput()`) and low-level audio nodes:
 
 ```java
 import com.github.satori87.gdx.webaudio.SoundGroup;
@@ -633,7 +756,11 @@ musicGroup.getOutput().connect(ctx.getDestination());
 SoundGroup sfxGroup = ctx.createSoundGroup();
 sfxGroup.getOutput().connect(ctx.getDestination());
 
-// Route sources through groups
+// Route WebSound/WebMusic through groups
+sound.setOutput(sfxGroup.getInput());
+music.setOutput(musicGroup.getInput());
+
+// Or route low-level nodes directly
 musicSource.connect(musicGroup.getInput());
 sfxSource.connect(sfxGroup.getInput());
 
@@ -650,7 +777,9 @@ musicGroup.fadeOut(1500);         // Fade out to 0 over 1.5s
 musicGroup.fadeIn(1000, 0.7f);   // Fade in to volume 0.7 over 1s
 ```
 
-### SoundPool (Fire-and-Forget Playback)
+### SoundPool (Low-Level Fire-and-Forget)
+
+> **Note:** For most sound effect use cases, prefer `WebSound` (via `ctx.loadSound()`) which provides a simpler API with built-in volume, pitch, pan, pause/resume, and automatic instance management. `SoundPool` is a lower-level utility for when you need direct `AudioBufferSourceNode` access.
 
 `SoundPool` manages a pool of `AudioBufferSourceNode` instances for efficient one-shot playback:
 
@@ -1224,6 +1353,8 @@ float sr = buffer.getSampleRate();
 
 | Class | Description |
 |-------|-------------|
+| `WebSound` | Fire-and-forget sound effect playback with concurrent instances (mirrors libGDX `Sound`) |
+| `WebMusic` | Long-form music playback with pause, resume, seek, and completion (mirrors libGDX `Music`) |
 | `SoundGroup` | Mixing bus with shared volume, pan, and fade controls |
 | `SoundPool` | Object pool for fire-and-forget `AudioBufferSourceNode` playback |
 

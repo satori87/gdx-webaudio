@@ -8,6 +8,11 @@ package com.github.satori87.gdx.webaudio;
  * {@link WebAudioContext#createBuffer(int, int, float)} or obtained by decoding
  * audio data with {@link WebAudioContext#decodeAudioData(byte[], DecodeCallback, Runnable)}.
  *
+ * <p>For typical audio playback, prefer {@link WebSound} or {@link WebMusic} (via
+ * {@link WebAudioContext#loadSound} and {@link WebAudioContext#loadMusic}) which handle
+ * file loading and buffer decoding automatically. Both expose {@code getBuffer()} as an
+ * escape hatch for direct buffer access when needed.</p>
+ *
  * @see AudioBuffer (Web Audio API)
  */
 public interface AudioBuffer {

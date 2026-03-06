@@ -1,8 +1,19 @@
 package com.github.satori87.gdx.webaudio;
 
-import com.github.satori87.gdx.webaudio.source.AudioBufferSourceNode;
+import com.badlogic.gdx.files.FileHandle;
+import com.github.satori87.gdx.webaudio.analysis.AnalyserNode;
+import com.github.satori87.gdx.webaudio.channel.ChannelMergerNode;
+import com.github.satori87.gdx.webaudio.channel.ChannelSplitterNode;
+import com.github.satori87.gdx.webaudio.effect.*;
+import com.github.satori87.gdx.webaudio.source.*;
+import com.github.satori87.gdx.webaudio.spatial.PannerNode;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene2D;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene3D;
+import com.github.satori87.gdx.webaudio.types.AudioContextState;
 import com.github.satori87.gdx.webaudio.types.ChannelCountMode;
 import com.github.satori87.gdx.webaudio.types.ChannelInterpretation;
+import com.github.satori87.gdx.webaudio.types.NoiseType;
+import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +83,7 @@ class SoundPoolTest {
         }
 
         // Unused methods — return null / no-op
-        @Override public com.github.satori87.gdx.webaudio.types.AudioContextState getState() { return null; }
+        @Override public AudioContextState getState() { return null; }
         @Override public double getCurrentTime() { return 0; }
         @Override public float getSampleRate() { return 0; }
         @Override public AudioDestinationNode getDestination() { return null; }
@@ -85,39 +96,41 @@ class SoundPoolTest {
         @Override public double getOutputLatency() { return 0; }
         @Override public AudioBuffer createBuffer(int ch, int len, float sr) { return null; }
         @Override public void decodeAudioData(byte[] d, AudioBuffer.DecodeCallback s, Runnable e) {}
-        @Override public com.github.satori87.gdx.webaudio.source.OscillatorNode createOscillator() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.source.ConstantSourceNode createConstantSource() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.GainNode createGain() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.BiquadFilterNode createBiquadFilter() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.IIRFilterNode createIIRFilter(float[] ff, float[] fb) { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.DelayNode createDelay() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.DelayNode createDelay(float max) { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.ConvolverNode createConvolver() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.WaveShaperNode createWaveShaper() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.DynamicsCompressorNode createDynamicsCompressor() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.StereoPannerNode createStereoPanner() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.spatial.PannerNode createPanner() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.analysis.AnalyserNode createAnalyser() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.channel.ChannelSplitterNode createChannelSplitter() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.channel.ChannelSplitterNode createChannelSplitter(int n) { return null; }
-        @Override public com.github.satori87.gdx.webaudio.channel.ChannelMergerNode createChannelMerger() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.channel.ChannelMergerNode createChannelMerger(int n) { return null; }
+        @Override public OscillatorNode createOscillator() { return null; }
+        @Override public ConstantSourceNode createConstantSource() { return null; }
+        @Override public GainNode createGain() { return null; }
+        @Override public BiquadFilterNode createBiquadFilter() { return null; }
+        @Override public IIRFilterNode createIIRFilter(float[] ff, float[] fb) { return null; }
+        @Override public DelayNode createDelay() { return null; }
+        @Override public DelayNode createDelay(float max) { return null; }
+        @Override public ConvolverNode createConvolver() { return null; }
+        @Override public WaveShaperNode createWaveShaper() { return null; }
+        @Override public DynamicsCompressorNode createDynamicsCompressor() { return null; }
+        @Override public StereoPannerNode createStereoPanner() { return null; }
+        @Override public PannerNode createPanner() { return null; }
+        @Override public AnalyserNode createAnalyser() { return null; }
+        @Override public ChannelSplitterNode createChannelSplitter() { return null; }
+        @Override public ChannelSplitterNode createChannelSplitter(int n) { return null; }
+        @Override public ChannelMergerNode createChannelMerger() { return null; }
+        @Override public ChannelMergerNode createChannelMerger(int n) { return null; }
         @Override public PeriodicWave createPeriodicWave(float[] r, float[] i) { return null; }
         @Override public PeriodicWave createPeriodicWave(float[] r, float[] i, boolean d) { return null; }
         @Override public void addWorkletModule(String url, Runnable ok, Runnable err) {}
-        @Override public com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode createWorkletNode(String name) { return null; }
-        @Override public com.github.satori87.gdx.webaudio.source.MediaStreamAudioDestinationNode createMediaStreamDestination() { return null; }
+        @Override public AudioWorkletNode createWorkletNode(String name) { return null; }
+        @Override public MediaStreamAudioDestinationNode createMediaStreamDestination() { return null; }
         @Override public float getMasterVolume() { return 0; }
         @Override public void setMasterVolume(float v) {}
-        @Override public com.github.satori87.gdx.webaudio.source.NoiseNode createNoise(com.github.satori87.gdx.webaudio.types.NoiseType type) { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.ChorusNode createChorus() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.FlangerNode createFlanger() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.PhaserNode createPhaser() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.ReverbNode createReverb() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.effect.LimiterNode createLimiter() { return null; }
+        @Override public NoiseNode createNoise(NoiseType type) { return null; }
+        @Override public ChorusNode createChorus() { return null; }
+        @Override public FlangerNode createFlanger() { return null; }
+        @Override public PhaserNode createPhaser() { return null; }
+        @Override public ReverbNode createReverb() { return null; }
+        @Override public LimiterNode createLimiter() { return null; }
         @Override public SoundGroup createSoundGroup() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene2D createSpatialScene2D() { return null; }
-        @Override public com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene3D createSpatialScene3D() { return null; }
+        @Override public SpatialAudioScene2D createSpatialScene2D() { return null; }
+        @Override public SpatialAudioScene3D createSpatialScene3D() { return null; }
+        @Override public void loadSound(FileHandle file, WebSound.LoadCallback onLoaded, Runnable onError) {}
+        @Override public void loadMusic(FileHandle file, WebMusic.LoadCallback onLoaded, Runnable onError) {}
     }
 
     /** Minimal stub used as a destination node. */

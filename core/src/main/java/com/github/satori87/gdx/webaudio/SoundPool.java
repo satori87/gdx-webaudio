@@ -11,6 +11,10 @@ import com.github.satori87.gdx.webaudio.source.AudioBufferSourceNode;
  * {@link #free(AudioBufferSourceNode)} discards the used node — the pool automatically
  * replenishes itself when new nodes are obtained.</p>
  *
+ * <p>For most sound effect use cases, prefer {@link WebSound} (via
+ * {@link WebAudioContext#loadSound}) which provides a simpler API with built-in
+ * volume, pitch, pan, pause/resume, and automatic instance management.</p>
+ *
  * <p>Usage example:</p>
  * <pre>{@code
  * SoundPool pool = new SoundPool(context, buffer);

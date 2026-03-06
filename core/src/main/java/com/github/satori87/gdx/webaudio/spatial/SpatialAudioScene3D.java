@@ -12,6 +12,11 @@ import com.github.satori87.gdx.webaudio.types.PanningModel;
  * <p>Provides full 3D spatialization, including listener orientation for accurate HRTF rendering.
  * Supports integration with libGDX's {@link Camera} for automatic listener position and
  * orientation updates. Newly created sources inherit the scene's default panning and distance models.</p>
+ *
+ * <p>{@link com.github.satori87.gdx.webaudio.WebSound WebSound} and
+ * {@link com.github.satori87.gdx.webaudio.WebMusic WebMusic} can be spatialized
+ * by routing to a source's input:
+ * {@code sound.setOutput(scene.createSource(x, y, z).getInput())}</p>
  */
 public interface SpatialAudioScene3D {
 

@@ -10,6 +10,11 @@ import com.github.satori87.gdx.webaudio.WebAudioContext;
  * <p>Provides a convenient abstraction for 2D games, automatically mapping world coordinates
  * to the Web Audio API's 3D spatialization (with Z fixed at 0). Supports integration with
  * libGDX's {@link OrthographicCamera} for automatic listener updates.</p>
+ *
+ * <p>{@link com.github.satori87.gdx.webaudio.WebSound WebSound} and
+ * {@link com.github.satori87.gdx.webaudio.WebMusic WebMusic} can be spatialized
+ * by routing to a source's input:
+ * {@code sound.setOutput(scene.createSource(x, y).getInput())}</p>
  */
 public interface SpatialAudioScene2D {
 
