@@ -73,6 +73,35 @@ public interface SpatialAudioScene2D {
     void setMasterVolume(float volume);
 
     /**
+     * Sets the listener velocity for Doppler effect computation.
+     *
+     * @param x the X-component of velocity in world units per second
+     * @param y the Y-component of velocity in world units per second
+     */
+    void setListenerVelocity(float x, float y);
+
+    /**
+     * Sets the Doppler effect intensity factor. A value of 0 disables Doppler,
+     * 1.0 is physically accurate, and values greater than 1 exaggerate the effect.
+     *
+     * @param factor the Doppler factor, default 0 (disabled)
+     */
+    void setDopplerFactor(float factor);
+
+    /**
+     * Sets the speed of sound in world units per second, used for Doppler calculations.
+     *
+     * @param speed the speed of sound, default 343.3 (meters per second)
+     */
+    void setSpeedOfSound(float speed);
+
+    /**
+     * Updates Doppler effect calculations for all sources with a registered Doppler target.
+     * Call this once per frame from your game loop.
+     */
+    void update();
+
+    /**
      * Releases all resources associated with this scene.
      */
     void dispose();

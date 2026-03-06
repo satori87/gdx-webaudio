@@ -11,6 +11,9 @@ import com.github.satori87.gdx.webaudio.spatial.SpatialAudioSource;
 import com.github.satori87.gdx.webaudio.types.DistanceModel;
 import com.github.satori87.gdx.webaudio.types.PanningModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * TeaVM/browser implementation of {@link SpatialAudioScene2D}.
  *
@@ -22,6 +25,11 @@ public class TeaVMSpatialAudioScene2D implements SpatialAudioScene2D {
     private final WebAudioContext context;
     private final GainNode masterGain;
     private float worldScale = 1.0f;
+    private final List<TeaVMSpatialAudioSource> sources = new ArrayList<>();
+    private float listenerX, listenerY;
+    private float listenerVelX, listenerVelY;
+    private float dopplerFactor = 0f;
+    private float speedOfSound = 343.3f;
 
     public TeaVMSpatialAudioScene2D(WebAudioContext context) {
         this.context = context;
@@ -33,10 +41,13 @@ public class TeaVMSpatialAudioScene2D implements SpatialAudioScene2D {
     }
 
     @Override public void setListenerPosition(float x, float y) {
+        this.listenerX = x; this.listenerY = y;
+        // Map 2D game coords to 3D audio: game X → audio X, game Y → audio -Z
+        // The listener faces -Z, so game "up" (Y+) = audio "in front" (-Z)
         AudioListener listener = context.getListener();
         listener.getPositionX().setValue(x * worldScale);
-        listener.getPositionY().setValue(y * worldScale);
-        listener.getPositionZ().setValue(0);
+        listener.getPositionY().setValue(0);
+        listener.getPositionZ().setValue(-y * worldScale);
     }
     @Override public void setListenerPosition(Vector2 position) { setListenerPosition(position.x, position.y); }
     @Override public void updateListenerFromCamera(OrthographicCamera camera) {
@@ -50,14 +61,40 @@ public class TeaVMSpatialAudioScene2D implements SpatialAudioScene2D {
         panner.setRefDistance(1);
         panner.setMaxDistance(10000);
         panner.setRolloffFactor(1);
-        panner.setPosition(x * worldScale, y * worldScale, 0);
+        panner.setPosition(x * worldScale, 0, -y * worldScale);
         GainNode gain = context.createGain();
         panner.connect(gain);
         gain.connect(masterGain);
-        return new TeaVMSpatialAudioSource(panner, gain, worldScale);
+        TeaVMSpatialAudioSource source = new TeaVMSpatialAudioSource(panner, gain, worldScale);
+        source.posX = x; source.posY = y; source.posZ = 0;
+        sources.add(source);
+        return source;
     }
     @Override public void setWorldScale(float unitsPerMeter) { this.worldScale = unitsPerMeter; }
     @Override public WebAudioContext getContext() { return context; }
     @Override public void setMasterVolume(float volume) { masterGain.getGain().setValue(volume); }
+    @Override public void setListenerVelocity(float x, float y) {
+        this.listenerVelX = x; this.listenerVelY = y;
+    }
+    @Override public void setDopplerFactor(float factor) { this.dopplerFactor = factor; }
+    @Override public void setSpeedOfSound(float speed) { this.speedOfSound = speed; }
+    @Override public void update() {
+        if (dopplerFactor == 0) return;
+        for (int i = 0; i < sources.size(); i++) {
+            TeaVMSpatialAudioSource source = sources.get(i);
+            if (source.dopplerTarget == null) continue;
+            float dx = source.posX - listenerX;
+            float dy = source.posY - listenerY;
+            float dist = (float)Math.sqrt(dx * dx + dy * dy);
+            if (dist < 0.0001f) continue;
+            float invDist = 1.0f / dist;
+            dx *= invDist; dy *= invDist;
+            float vListener = listenerVelX * dx + listenerVelY * dy;
+            float vSource = source.velX * dx + source.velY * dy;
+            float ratio = (speedOfSound + vListener) / (speedOfSound + vSource);
+            float shift = 1.0f + dopplerFactor * (ratio - 1.0f);
+            source.dopplerTarget.setValue(shift);
+        }
+    }
     @Override public void dispose() { masterGain.disconnect(); }
 }

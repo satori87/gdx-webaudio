@@ -82,6 +82,14 @@ class AllEnumsTest {
         }
     }
 
+    @Test void allNoiseTypesRoundTrip() {
+        for (NoiseType v : NoiseType.values()) {
+            assertNotNull(v.toJsValue());
+            assertFalse(v.toJsValue().isEmpty());
+            assertEquals(v, NoiseType.fromJsValue(v.toJsValue()));
+        }
+    }
+
     @Test void allEnumsRejectNull() {
         assertThrows(Exception.class, () -> OscillatorType.fromJsValue(null));
         assertThrows(Exception.class, () -> BiquadFilterType.fromJsValue(null));
@@ -92,5 +100,6 @@ class AllEnumsTest {
         assertThrows(Exception.class, () -> OverSampleType.fromJsValue(null));
         assertThrows(Exception.class, () -> AudioContextState.fromJsValue(null));
         assertThrows(Exception.class, () -> AutomationRate.fromJsValue(null));
+        assertThrows(Exception.class, () -> NoiseType.fromJsValue(null));
     }
 }

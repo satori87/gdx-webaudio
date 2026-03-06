@@ -6,7 +6,10 @@ import com.github.satori87.gdx.webaudio.channel.ChannelSplitterNode;
 import com.github.satori87.gdx.webaudio.effect.*;
 import com.github.satori87.gdx.webaudio.source.*;
 import com.github.satori87.gdx.webaudio.spatial.PannerNode;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene2D;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene3D;
 import com.github.satori87.gdx.webaudio.types.AudioContextState;
+import com.github.satori87.gdx.webaudio.types.NoiseType;
 import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
 
 /**
@@ -317,4 +320,93 @@ public interface WebAudioContext {
      * @return a new {@link MediaStreamAudioDestinationNode}
      */
     MediaStreamAudioDestinationNode createMediaStreamDestination();
+
+    // -- Master volume --
+
+    /**
+     * Returns the master volume level for the entire context.
+     *
+     * @return the master volume (1.0 = full, 0.0 = silent)
+     */
+    float getMasterVolume();
+
+    /**
+     * Sets the master volume level for the entire context.
+     * All audio routed to the destination is scaled by this value.
+     *
+     * @param volume the master volume level
+     */
+    void setMasterVolume(float volume);
+
+    // -- Noise --
+
+    /**
+     * Creates a noise source node of the specified type.
+     *
+     * @param type the type of noise to generate
+     * @return a new {@link NoiseNode}
+     */
+    NoiseNode createNoise(NoiseType type);
+
+    // -- Composite effects --
+
+    /**
+     * Creates a chorus effect node.
+     *
+     * @return a new {@link ChorusNode}
+     */
+    ChorusNode createChorus();
+
+    /**
+     * Creates a flanger effect node.
+     *
+     * @return a new {@link FlangerNode}
+     */
+    FlangerNode createFlanger();
+
+    /**
+     * Creates a phaser effect node.
+     *
+     * @return a new {@link PhaserNode}
+     */
+    PhaserNode createPhaser();
+
+    /**
+     * Creates a parametric reverb effect node.
+     *
+     * @return a new {@link ReverbNode}
+     */
+    ReverbNode createReverb();
+
+    /**
+     * Creates a limiter effect node.
+     *
+     * @return a new {@link LimiterNode}
+     */
+    LimiterNode createLimiter();
+
+    // -- Sound group --
+
+    /**
+     * Creates a sound group (mixing bus) for grouping audio sources with shared controls.
+     *
+     * @return a new {@link SoundGroup}
+     */
+    SoundGroup createSoundGroup();
+
+    // -- Spatial scenes --
+
+    /**
+     * Creates a 2D spatial audio scene with listener positioning and source management.
+     *
+     * @return a new {@link SpatialAudioScene2D}
+     */
+    SpatialAudioScene2D createSpatialScene2D();
+
+    /**
+     * Creates a 3D spatial audio scene with listener positioning and source management.
+     *
+     * @return a new {@link SpatialAudioScene3D}
+     */
+    SpatialAudioScene3D createSpatialScene3D();
 }

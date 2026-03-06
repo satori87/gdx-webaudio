@@ -79,7 +79,12 @@ public class ExampleLauncher extends ApplicationAdapter {
         "18. Convolution Reverb (ConvolverNode)",
         "19. Advanced Sources (Const/Periodic/Offset/Detune)",
         "20. Context & Node Info (State/Latency/Props)",
-        "21. Distance Models & Panning Compare"
+        "21. Distance Models & Panning Compare",
+        "22. Noise Generator (NoiseNode)",
+        "23. Composite Effects (Chorus/Flanger/Phaser/Reverb/Limiter)",
+        "24. Sound Groups (Mixing Bus + Master Volume)",
+        "25. Sound Pool (Fire-and-Forget Playback)",
+        "26. Doppler Effect (2D Spatial)"
     };
 
     @SuppressWarnings("unchecked")
@@ -104,7 +109,12 @@ public class ExampleLauncher extends ApplicationAdapter {
         ConvolutionReverbExample::new,
         AdvancedSourcesExample::new,
         ContextInfoExample::new,
-        DistanceModelCompareExample::new
+        DistanceModelCompareExample::new,
+        NoiseGeneratorExample::new,
+        CompositeEffectsExample::new,
+        SoundGroupExample::new,
+        SoundPoolExample::new,
+        DopplerEffectExample::new
     };
 
     @Override

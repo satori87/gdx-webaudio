@@ -14,8 +14,13 @@ import com.github.satori87.gdx.webaudio.teavm.effect.*;
 import com.github.satori87.gdx.webaudio.teavm.jso.*;
 import com.github.satori87.gdx.webaudio.teavm.source.*;
 import com.github.satori87.gdx.webaudio.teavm.spatial.TeaVMPannerNode;
+import com.github.satori87.gdx.webaudio.teavm.spatial.TeaVMSpatialAudioScene2D;
+import com.github.satori87.gdx.webaudio.teavm.spatial.TeaVMSpatialAudioScene3D;
 import com.github.satori87.gdx.webaudio.teavm.worklet.TeaVMAudioWorkletNode;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene2D;
+import com.github.satori87.gdx.webaudio.spatial.SpatialAudioScene3D;
 import com.github.satori87.gdx.webaudio.types.AudioContextState;
+import com.github.satori87.gdx.webaudio.types.NoiseType;
 import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
 
 /**
@@ -27,19 +32,30 @@ import com.github.satori87.gdx.webaudio.worklet.AudioWorkletNode;
  */
 public class TeaVMWebAudioContext implements WebAudioContext {
     protected final JSAudioContext jsCtx;
+    private final JSGainNode masterGainNode;
+    private TeaVMMasterDestinationNode cachedDestination;
 
     public TeaVMWebAudioContext() {
         this.jsCtx = new JSAudioContext();
+        this.masterGainNode = jsCtx.createGain();
+        this.masterGainNode.connect(jsCtx.getDestination());
     }
 
     protected TeaVMWebAudioContext(JSAudioContext jsCtx) {
         this.jsCtx = jsCtx;
+        this.masterGainNode = jsCtx.createGain();
+        this.masterGainNode.connect(jsCtx.getDestination());
     }
 
     @Override public AudioContextState getState() { return AudioContextState.fromJsValue(jsCtx.getState()); }
     @Override public double getCurrentTime() { return jsCtx.getCurrentTime(); }
     @Override public float getSampleRate() { return jsCtx.getSampleRate(); }
-    @Override public AudioDestinationNode getDestination() { return new TeaVMAudioDestinationNode(jsCtx.getDestination(), this); }
+    @Override public AudioDestinationNode getDestination() {
+        if (cachedDestination == null) {
+            cachedDestination = new TeaVMMasterDestinationNode(masterGainNode, jsCtx.getDestination(), this);
+        }
+        return cachedDestination;
+    }
     @Override public AudioListener getListener() { return new TeaVMAudioListener(jsCtx.getListener()); }
     @Override public void resume(Runnable onResumed) { jsCtx.resume(() -> { if (onResumed != null) onResumed.run(); }); }
     @Override public void suspend(Runnable onSuspended) { jsCtx.suspend(() -> { if (onSuspended != null) onSuspended.run(); }); }
@@ -93,4 +109,16 @@ public class TeaVMWebAudioContext implements WebAudioContext {
     @Override public MediaStreamAudioDestinationNode createMediaStreamDestination() {
         return new TeaVMMediaStreamAudioDestinationNode(jsCtx.createMediaStreamDestination(), this);
     }
+
+    @Override public float getMasterVolume() { return masterGainNode.getGain().getValue(); }
+    @Override public void setMasterVolume(float volume) { masterGainNode.getGain().setValue(volume); }
+    @Override public NoiseNode createNoise(NoiseType type) { return new TeaVMNoiseNode(jsCtx, this, type); }
+    @Override public ChorusNode createChorus() { return new TeaVMChorusNode(jsCtx, this); }
+    @Override public FlangerNode createFlanger() { return new TeaVMFlangerNode(jsCtx, this); }
+    @Override public PhaserNode createPhaser() { return new TeaVMPhaserNode(jsCtx, this); }
+    @Override public ReverbNode createReverb() { return new TeaVMReverbNode(jsCtx, this); }
+    @Override public LimiterNode createLimiter() { return new TeaVMLimiterNode(jsCtx, this); }
+    @Override public SoundGroup createSoundGroup() { return new TeaVMSoundGroup(this); }
+    @Override public SpatialAudioScene2D createSpatialScene2D() { return new TeaVMSpatialAudioScene2D(this); }
+    @Override public SpatialAudioScene3D createSpatialScene3D() { return new TeaVMSpatialAudioScene3D(this); }
 }

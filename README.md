@@ -9,8 +9,14 @@ A comprehensive Java abstraction over the [Web Audio API](https://developer.mozi
 ## Features
 
 - **Complete Web Audio API coverage** — Oscillators, buffer sources, gain, filters, delay, reverb, compression, wave shaping, stereo panning, and more
+- **Composite effects** — High-level Chorus, Flanger, Phaser, Reverb, and Limiter nodes with simple parameter controls
+- **Noise generation** — White, pink, and brownian noise via `NoiseNode`
+- **Sound groups** — `SoundGroup` mixing buses with shared volume, pan, and fade controls
+- **Sound pooling** — `SoundPool` for efficient fire-and-forget playback of one-shot sounds
+- **Master volume** — Global volume control on `WebAudioContext`
 - **3D spatial audio** — PannerNode with HRTF/equalpower models, distance attenuation, and directional cones
 - **High-level spatial scenes** — `SpatialAudioScene2D` and `SpatialAudioScene3D` integrate directly with libGDX cameras
+- **Doppler effect** — Velocity-based pitch shifting with configurable Doppler factor and speed of sound
 - **Audio parameter automation** — Schedule precise value changes with ramps, curves, and targets
 - **Real-time analysis** — FFT spectrum and waveform data via AnalyserNode
 - **Offline rendering** — Render audio graphs to buffers without real-time playback
@@ -613,6 +619,153 @@ musicSource.connect(musicBus);
 sfxBus.getGain().setValueAtTime(0, ctx.getCurrentTime());
 ```
 
+### SoundGroup (Mixing Bus)
+
+`SoundGroup` provides a higher-level mixing bus with built-in volume, stereo pan, and fade controls:
+
+```java
+import com.github.satori87.gdx.webaudio.SoundGroup;
+
+// Create two groups for music and SFX
+SoundGroup musicGroup = ctx.createSoundGroup();
+musicGroup.getOutput().connect(ctx.getDestination());
+
+SoundGroup sfxGroup = ctx.createSoundGroup();
+sfxGroup.getOutput().connect(ctx.getDestination());
+
+// Route sources through groups
+musicSource.connect(musicGroup.getInput());
+sfxSource.connect(sfxGroup.getInput());
+
+// Control group volume (0.0 = silent, 1.0 = full)
+musicGroup.setVolume(0.8f);
+sfxGroup.setVolume(1.0f);
+
+// Stereo pan (-1.0 = left, 0.0 = center, 1.0 = right)
+musicGroup.setPan(-0.3f); // Slightly left
+
+// Fade in/out with duration in milliseconds
+musicGroup.fadeIn(2000);          // Fade in to volume 1.0 over 2s
+musicGroup.fadeOut(1500);         // Fade out to 0 over 1.5s
+musicGroup.fadeIn(1000, 0.7f);   // Fade in to volume 0.7 over 1s
+```
+
+### SoundPool (Fire-and-Forget Playback)
+
+`SoundPool` manages a pool of `AudioBufferSourceNode` instances for efficient one-shot playback:
+
+```java
+import com.github.satori87.gdx.webaudio.SoundPool;
+
+// Create a pool from a decoded buffer
+SoundPool explosionPool = new SoundPool(ctx, explosionBuffer);
+
+// Fire-and-forget: plays and auto-cleans up when done
+explosionPool.play(ctx.getDestination());
+
+// Or get a source for more control before playing
+AudioBufferSourceNode src = explosionPool.obtain(ctx.getDestination());
+src.getPlaybackRate().setValueAtTime(1.2f, ctx.getCurrentTime()); // Higher pitch
+src.start();
+
+// With custom capacity
+SoundPool laserPool = new SoundPool(ctx, laserBuffer, 8, 32);
+```
+
+### Master Volume
+
+Control the global output volume for the entire audio context:
+
+```java
+// Get/set master volume (default 1.0)
+float vol = ctx.getMasterVolume();
+ctx.setMasterVolume(0.5f);  // 50% global volume
+
+// Useful for settings menus
+ctx.setMasterVolume(0.0f);  // Mute all audio
+ctx.setMasterVolume(1.0f);  // Restore full volume
+```
+
+### Noise Generation
+
+Generate continuous noise signals for sound effects, synthesizers, or ambient audio:
+
+```java
+import com.github.satori87.gdx.webaudio.source.NoiseNode;
+import com.github.satori87.gdx.webaudio.types.NoiseType;
+
+// White noise — equal energy per frequency (flat spectrum)
+NoiseNode white = ctx.createNoise(NoiseType.WHITE);
+
+// Pink noise — equal energy per octave (1/f), natural-sounding
+NoiseNode pink = ctx.createNoise(NoiseType.PINK);
+
+// Brownian noise — deep rumble (1/f²)
+NoiseNode brown = ctx.createNoise(NoiseType.BROWNIAN);
+
+GainNode volume = ctx.createGain();
+volume.getGain().setValueAtTime(0.3f, ctx.getCurrentTime());
+white.connect(volume);
+volume.connect(ctx.getDestination());
+white.start();
+
+// Stop when done (noise nodes are one-shot, like oscillators)
+white.stop();
+```
+
+### Composite Effects
+
+High-level effect nodes with simple parameter controls. Each handles its own internal routing:
+
+```java
+import com.github.satori87.gdx.webaudio.effect.*;
+
+// Chorus — adds warmth and width with modulated delay
+ChorusNode chorus = ctx.createChorus();
+chorus.setRate(0.8f);       // LFO rate in Hz
+chorus.setDepth(3.0f);      // Modulation depth in ms
+chorus.setDelay(25.0f);     // Base delay in ms
+chorus.setWet(0.5f);        // Wet/dry mix
+source.connect(chorus);
+chorus.connect(ctx.getDestination());
+
+// Flanger — metallic sweeping effect with feedback
+FlangerNode flanger = ctx.createFlanger();
+flanger.setRate(0.3f);      // LFO rate in Hz
+flanger.setDepth(2.0f);     // Depth in ms
+flanger.setDelay(5.0f);     // Short base delay
+flanger.setFeedback(0.6f);  // Feedback creates resonance
+
+// Phaser — sweeping notch filters
+PhaserNode phaser = ctx.createPhaser();
+phaser.setRate(0.5f);
+phaser.setDepth(0.7f);      // Modulation depth (0-1)
+phaser.setStages(6);        // More stages = more notches
+phaser.setFeedback(0.3f);
+phaser.setFrequencyRangeMin(200);   // Sweep range
+phaser.setFrequencyRangeMax(4000);
+
+// Reverb — parametric reverb with synthetic impulse response
+ReverbNode reverb = ctx.createReverb();
+reverb.setRoomSize(0.7f);   // 0-1, controls tail length
+reverb.setDamping(0.5f);    // 0-1, high-frequency absorption
+reverb.setWet(0.4f);
+reverb.setDry(0.6f);
+
+// Limiter — prevents clipping
+LimiterNode limiter = ctx.createLimiter();
+limiter.setCeiling(-1.0f);     // Max output in dB
+limiter.setInputGain(3.0f);    // Boost input in dB
+limiter.setAttack(1.0f);       // Attack in ms
+limiter.setRelease(100.0f);    // Release in ms
+
+// Chain effects: source → chorus → reverb → limiter → output
+source.connect(chorus);
+chorus.connect(reverb);
+reverb.connect(limiter);
+limiter.connect(ctx.getDestination());
+```
+
 ---
 
 ## Spatial Audio
@@ -625,7 +778,7 @@ Use `SpatialAudioScene2D` for top-down or side-scrolling games:
 import com.github.satori87.gdx.webaudio.spatial.*;
 import com.github.satori87.gdx.webaudio.types.DistanceModel;
 
-SpatialAudioScene2D scene = /* create via TeaVM factory */;
+SpatialAudioScene2D scene = ctx.createSpatialScene2D();
 scene.setWorldScale(1.0f / 32f); // 32 pixels per meter
 
 // Create a positioned sound source
@@ -656,7 +809,7 @@ Use `SpatialAudioScene3D` for 3D games:
 import com.github.satori87.gdx.webaudio.spatial.*;
 import com.github.satori87.gdx.webaudio.types.*;
 
-SpatialAudioScene3D scene = /* create via TeaVM factory */;
+SpatialAudioScene3D scene = ctx.createSpatialScene3D();
 scene.setWorldScale(1.0f);  // 1 unit = 1 meter
 scene.setDefaultPanningModel(PanningModel.HRTF);
 scene.setDefaultDistanceModel(DistanceModel.INVERSE);
@@ -738,6 +891,44 @@ panner.setConeOuterGain(0.2f);   // Volume multiplier outside the outer cone
 // Point the source in a direction
 panner.setOrientation(0, 0, -1); // Facing forward (-Z)
 ```
+
+### Doppler Effect
+
+Add velocity-based pitch shifting to spatial audio sources. The Doppler effect makes approaching sounds higher-pitched and receding sounds lower-pitched:
+
+```java
+SpatialAudioScene2D scene = ctx.createSpatialScene2D();
+scene.setListenerPosition(0, 0);
+
+// Configure Doppler parameters
+scene.setDopplerFactor(3.0f);    // Exaggerate effect (1.0 = realistic)
+scene.setSpeedOfSound(100);      // In world units/sec (lower = more dramatic)
+
+// Create a source with a looping sound
+SpatialAudioSource source = scene.createSource(0, 0);
+source.setRefDistance(5);
+source.setMaxDistance(200);
+
+AudioBufferSourceNode loop = ctx.createBufferSource();
+loop.setBuffer(toneBuffer);
+loop.setLoop(true);
+loop.connect(source.getInput());
+
+// Register the playback rate as the Doppler target
+// The scene will adjust this parameter based on relative velocity
+source.setDopplerTarget(loop.getPlaybackRate());
+loop.start();
+
+// In your game loop — update source position, velocity, then call update()
+float sourceX = ..., sourceY = ...;
+float velX = ..., velY = ...;
+source.setPosition(sourceX, sourceY);
+source.setVelocity(velX, velY);
+scene.setListenerVelocity(0, 0);  // If the listener is also moving
+scene.update();  // Recalculates Doppler shift for all sources
+```
+
+The same pattern works with `SpatialAudioScene3D` using 3D positions and velocities.
 
 ---
 
@@ -988,6 +1179,7 @@ float sr = buffer.getSampleRate();
 | `OscillatorNode` | Generates periodic waveforms (sine, square, sawtooth, triangle, custom) |
 | `AudioBufferSourceNode` | Plays audio from an in-memory AudioBuffer |
 | `ConstantSourceNode` | Outputs a constant DC value, useful for modulation |
+| `NoiseNode` | Generates white, pink, or brownian noise |
 | `MediaElementAudioSourceNode` | Wraps an HTML `<audio>` or `<video>` element |
 | `MediaStreamAudioSourceNode` | Wraps a MediaStream (e.g., microphone input) |
 | `MediaStreamAudioDestinationNode` | Creates a MediaStream from audio graph output |
@@ -1004,6 +1196,11 @@ float sr = buffer.getSampleRate();
 | `WaveShaperNode` | Applies non-linear distortion via a shaping curve |
 | `DynamicsCompressorNode` | Dynamic range compression |
 | `StereoPannerNode` | Simple left/right stereo panning |
+| `ChorusNode` | Chorus effect with LFO-modulated delay |
+| `FlangerNode` | Flanger effect with short modulated delay and feedback |
+| `PhaserNode` | Phaser effect with cascaded allpass filters |
+| `ReverbNode` | Parametric reverb with synthetic impulse response |
+| `LimiterNode` | Brickwall limiter preventing clipping |
 
 ### Spatial Nodes
 
@@ -1023,6 +1220,13 @@ float sr = buffer.getSampleRate();
 | `ChannelMergerNode` | Merges multiple inputs into a multi-channel output |
 | `AudioWorkletNode` | Runs custom JavaScript audio processors |
 
+### Utility Classes
+
+| Class | Description |
+|-------|-------------|
+| `SoundGroup` | Mixing bus with shared volume, pan, and fade controls |
+| `SoundPool` | Object pool for fire-and-forget `AudioBufferSourceNode` playback |
+
 ### Enum Types
 
 | Enum | Values |
@@ -1036,6 +1240,7 @@ float sr = buffer.getSampleRate();
 | `OverSampleType` | `NONE`, `TWO_X`, `FOUR_X` |
 | `AudioContextState` | `SUSPENDED`, `RUNNING`, `CLOSED` |
 | `AutomationRate` | `A_RATE`, `K_RATE` |
+| `NoiseType` | `WHITE`, `PINK`, `BROWNIAN` |
 
 ---
 

@@ -1,6 +1,7 @@
 package com.github.satori87.gdx.webaudio.spatial;
 
 import com.github.satori87.gdx.webaudio.AudioNode;
+import com.github.satori87.gdx.webaudio.AudioParam;
 import com.github.satori87.gdx.webaudio.types.DistanceModel;
 
 /**
@@ -109,4 +110,35 @@ public interface SpatialAudioSource {
      * @return the {@link PannerNode}
      */
     PannerNode getPannerNode();
+
+    /**
+     * Sets the velocity of this audio source for Doppler effect computation.
+     *
+     * @param x the X-component of velocity in world units per second
+     * @param y the Y-component of velocity in world units per second
+     * @param z the Z-component of velocity in world units per second
+     */
+    void setVelocity(float x, float y, float z);
+
+    /**
+     * Sets the velocity of this audio source in 2D, with Z velocity set to 0.
+     *
+     * @param x the X-component of velocity in world units per second
+     * @param y the Y-component of velocity in world units per second
+     */
+    void setVelocity(float x, float y);
+
+    /**
+     * Registers an {@link AudioParam} (typically a source's playback rate) to receive
+     * Doppler pitch shift adjustments computed by the owning spatial scene's
+     * {@code update()} method.
+     *
+     * <p>When set, the scene's update loop will compute the Doppler ratio based on
+     * source and listener positions and velocities, then set this param's value to
+     * the computed pitch multiplier. The param's value is fully managed by the Doppler
+     * system — do not set it manually while Doppler is active.</p>
+     *
+     * @param playbackRate the AudioParam to control, or {@code null} to disable Doppler
+     */
+    void setDopplerTarget(AudioParam playbackRate);
 }
