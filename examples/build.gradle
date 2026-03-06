@@ -1,0 +1,27 @@
+allprojects {
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+}
+
+configure(subprojects) {
+    apply plugin: 'java-library'
+    java.sourceCompatibility = 11
+    java.targetCompatibility = 11
+
+    compileJava {
+        options.incremental = true
+    }
+}
+
+subprojects {
+    version = "$projectVersion"
+    ext.appName = 'webaudio-examples'
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url = 'https://jitpack.io' }
+        maven { url = 'https://teavm.org/maven/repository/' }
+    }
+}
+
+eclipse.project.name = 'webaudio-examples' + '-parent'

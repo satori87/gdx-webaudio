@@ -1,0 +1,4 @@
+rootProject.name = 'gdx-webaudio'
+
+include ':core'
+include ':teavm'

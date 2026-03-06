@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':core')
+    implementation "org.teavm:teavm-jso:${teavmVersion}"
+    implementation "org.teavm:teavm-jso-apis:${teavmVersion}"
+}
