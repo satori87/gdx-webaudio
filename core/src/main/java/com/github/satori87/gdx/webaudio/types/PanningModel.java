@@ -3,6 +3,7 @@ package com.github.satori87.gdx.webaudio.types;
 /**
  * Enumeration of spatialization algorithms used by a {@code PannerNode}.
  * Maps to the Web Audio API {@code PanningModelType} enumeration.
+ * Note: the HRTF value maps to uppercase {@code "HRTF"} as required by the Web Audio API spec.
  *
  * @see PannerNode.panningModel (Web Audio API)
  */

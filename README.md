@@ -68,9 +68,15 @@ TeaVMWebAudio.initialize();
 // Then in your game code, create a context:
 WebAudioContext ctx = WebAudio.createContext();
 
-// Resume the context (required due to browser autoplay policies):
+// Resume on user gesture (required by browser autoplay policies).
+// Call ctx.resume() from a click, touch, or key event handler:
 ctx.resume(null);
 ```
+
+> **Autoplay Policy:** Browsers require a user gesture before audio can play. The AudioContext
+> starts suspended and must be resumed from within a user interaction event handler
+> (click, touch, or keypress). A common pattern is to register document-level listeners
+> that resume the context on first interaction.
 
 ### Playing a Sound Effect
 
@@ -1365,7 +1371,7 @@ float sr = buffer.getSampleRate();
 | `OscillatorType` | `SINE`, `SQUARE`, `SAWTOOTH`, `TRIANGLE`, `CUSTOM` |
 | `BiquadFilterType` | `LOWPASS`, `HIGHPASS`, `BANDPASS`, `LOWSHELF`, `HIGHSHELF`, `PEAKING`, `NOTCH`, `ALLPASS` |
 | `DistanceModel` | `LINEAR`, `INVERSE`, `EXPONENTIAL` |
-| `PanningModel` | `EQUALPOWER`, `HRTF` |
+| `PanningModel` | `EQUALPOWER` ("equalpower"), `HRTF` ("HRTF") |
 | `ChannelCountMode` | `MAX`, `CLAMPED_MAX`, `EXPLICIT` |
 | `ChannelInterpretation` | `SPEAKERS`, `DISCRETE` |
 | `OverSampleType` | `NONE`, `TWO_X`, `FOUR_X` |
@@ -1378,7 +1384,7 @@ float sr = buffer.getSampleRate();
 ## Browser Requirements
 
 - **Web Audio API** — Supported in all modern browsers (Chrome, Firefox, Safari, Edge)
-- **Autoplay Policy** — Most browsers require a user gesture (click/tap) before audio can play. Call `ctx.resume()` in response to user interaction
+- **Autoplay Policy** — Browsers require a user gesture (click/tap) before audio can play. Call `ctx.resume()` from within a user interaction event handler (click, touch, or keypress)
 - **HTTPS** — Required for AudioWorklet in production
 - **Sample Rates** — Typically 44100 Hz or 48000 Hz depending on the browser/OS
 

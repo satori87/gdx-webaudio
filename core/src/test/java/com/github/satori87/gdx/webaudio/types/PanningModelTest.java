@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PanningModelTest {
 
     @Test void equalpowerJsValue() { assertEquals("equalpower", PanningModel.EQUALPOWER.toJsValue()); }
-    @Test void hrtfJsValue() { assertEquals("hrtf", PanningModel.HRTF.toJsValue()); }
+    @Test void hrtfJsValue() { assertEquals("HRTF", PanningModel.HRTF.toJsValue()); }
 
     @Test void fromJsValueRoundTrip() {
         for (PanningModel model : PanningModel.values()) {
