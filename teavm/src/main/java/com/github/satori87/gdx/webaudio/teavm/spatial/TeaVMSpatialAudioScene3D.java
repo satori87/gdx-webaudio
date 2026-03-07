@@ -70,7 +70,7 @@ public class TeaVMSpatialAudioScene3D implements SpatialAudioScene3D {
     @Override public SpatialAudioSource createSource(Vector3 pos) { return createSource(pos.x, pos.y, pos.z); }
     @Override public void setDefaultPanningModel(PanningModel model) { this.defaultPanningModel = model; }
     @Override public void setDefaultDistanceModel(DistanceModel model) { this.defaultDistanceModel = model; }
-    @Override public void setWorldScale(float scale) { this.worldScale = scale; }
+    @Override public void setWorldScale(float scale) { this.worldScale = 1.0f / scale; }
     @Override public void setMasterVolume(float volume) { masterGain.getGain().setValue(volume); }
     @Override public WebAudioContext getContext() { return context; }
     @Override public void setListenerVelocity(float x, float y, float z) {

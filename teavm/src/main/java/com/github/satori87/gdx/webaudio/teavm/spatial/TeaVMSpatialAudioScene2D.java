@@ -70,7 +70,7 @@ public class TeaVMSpatialAudioScene2D implements SpatialAudioScene2D {
         sources.add(source);
         return source;
     }
-    @Override public void setWorldScale(float unitsPerMeter) { this.worldScale = unitsPerMeter; }
+    @Override public void setWorldScale(float unitsPerMeter) { this.worldScale = 1.0f / unitsPerMeter; }
     @Override public WebAudioContext getContext() { return context; }
     @Override public void setMasterVolume(float volume) { masterGain.getGain().setValue(volume); }
     @Override public void setListenerVelocity(float x, float y) {
