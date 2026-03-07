@@ -10,7 +10,7 @@ public enum PanningModel {
     /** A simple equal-power panning algorithm. Lower quality but less CPU-intensive. */
     EQUALPOWER("equalpower"),
     /** Head-related transfer function panning for realistic 3D audio spatialization. Higher quality but more CPU-intensive. */
-    HRTF("hrtf");
+    HRTF("HRTF");
 
     private final String jsValue;
 
