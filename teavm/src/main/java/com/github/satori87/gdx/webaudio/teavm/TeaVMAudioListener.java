@@ -29,16 +29,9 @@ public class TeaVMAudioListener implements AudioListener {
     @Override public AudioParam getUpZ() { return new TeaVMAudioParam(jsListener.getUpZ()); }
 
     @Override public void setPosition(float x, float y, float z) {
-        jsListener.getPositionX().setValue(x);
-        jsListener.getPositionY().setValue(y);
-        jsListener.getPositionZ().setValue(z);
+        jsListener.jsSetPosition(x, y, z);
     }
     @Override public void setOrientation(float fx, float fy, float fz, float ux, float uy, float uz) {
-        jsListener.getForwardX().setValue(fx);
-        jsListener.getForwardY().setValue(fy);
-        jsListener.getForwardZ().setValue(fz);
-        jsListener.getUpX().setValue(ux);
-        jsListener.getUpY().setValue(uy);
-        jsListener.getUpZ().setValue(uz);
+        jsListener.jsSetOrientation(fx, fy, fz, ux, uy, uz);
     }
 }

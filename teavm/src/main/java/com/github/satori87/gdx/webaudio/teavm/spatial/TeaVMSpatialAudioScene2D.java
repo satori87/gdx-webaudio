@@ -42,12 +42,10 @@ public class TeaVMSpatialAudioScene2D implements SpatialAudioScene2D {
 
     @Override public void setListenerPosition(float x, float y) {
         this.listenerX = x; this.listenerY = y;
-        // Map 2D game coords to 3D audio: game X → audio X, game Y → audio -Z
+        // Map 2D game coords to 3D audio: game X -> audio X, game Y -> audio -Z
         // The listener faces -Z, so game "up" (Y+) = audio "in front" (-Z)
         AudioListener listener = context.getListener();
-        listener.getPositionX().setValue(x * worldScale);
-        listener.getPositionY().setValue(0);
-        listener.getPositionZ().setValue(-y * worldScale);
+        listener.setPosition(x * worldScale, 0, -y * worldScale);
     }
     @Override public void setListenerPosition(Vector2 position) { setListenerPosition(position.x, position.y); }
     @Override public void updateListenerFromCamera(OrthographicCamera camera) {

@@ -42,4 +42,14 @@ public interface JSPannerNode extends JSAudioNode {
     @JSProperty void setConeOuterAngle(float angle);
     @JSProperty float getConeOuterGain();
     @JSProperty void setConeOuterGain(float gain);
+
+    @JSBody(params = {"x", "y", "z"}, script =
+        "if (this.positionX) { this.positionX.value = x; this.positionY.value = y; this.positionZ.value = z; }" +
+        "else if (this.setPosition) { this.setPosition(x, y, z); }")
+    void jsSetPosition(float x, float y, float z);
+
+    @JSBody(params = {"x", "y", "z"}, script =
+        "if (this.orientationX) { this.orientationX.value = x; this.orientationY.value = y; this.orientationZ.value = z; }" +
+        "else if (this.setOrientation) { this.setOrientation(x, y, z); }")
+    void jsSetOrientation(float x, float y, float z);
 }

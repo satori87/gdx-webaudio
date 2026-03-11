@@ -34,4 +34,15 @@ public interface JSAudioListener extends JSObject {
 
     @JSBody(script = "return this.upZ;")
     JSAudioParam getUpZ();
+
+    @JSBody(params = {"x", "y", "z"}, script =
+        "if (this.positionX) { this.positionX.value = x; this.positionY.value = y; this.positionZ.value = z; }" +
+        "else if (this.setPosition) { this.setPosition(x, y, z); }")
+    void jsSetPosition(float x, float y, float z);
+
+    @JSBody(params = {"fx", "fy", "fz", "ux", "uy", "uz"}, script =
+        "if (this.forwardX) { this.forwardX.value = fx; this.forwardY.value = fy; this.forwardZ.value = fz;" +
+        " this.upX.value = ux; this.upY.value = uy; this.upZ.value = uz; }" +
+        "else if (this.setOrientation) { this.setOrientation(fx, fy, fz, ux, uy, uz); }")
+    void jsSetOrientation(float fx, float fy, float fz, float ux, float uy, float uz);
 }

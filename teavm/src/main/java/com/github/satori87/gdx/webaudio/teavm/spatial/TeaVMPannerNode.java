@@ -45,9 +45,9 @@ public class TeaVMPannerNode extends TeaVMAudioNode implements PannerNode {
     @Override public PanningModel getPanningModel() { return PanningModel.fromJsValue(jsPanner.getPanningModel()); }
     @Override public void setPanningModel(PanningModel m) { jsPanner.setPanningModel(m.toJsValue()); }
     @Override public void setPosition(float x, float y, float z) {
-        jsPanner.getPositionX().setValue(x); jsPanner.getPositionY().setValue(y); jsPanner.getPositionZ().setValue(z);
+        jsPanner.jsSetPosition(x, y, z);
     }
     @Override public void setOrientation(float x, float y, float z) {
-        jsPanner.getOrientationX().setValue(x); jsPanner.getOrientationY().setValue(y); jsPanner.getOrientationZ().setValue(z);
+        jsPanner.jsSetOrientation(x, y, z);
     }
 }
